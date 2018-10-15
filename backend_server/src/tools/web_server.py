@@ -32,7 +32,7 @@ def start_network(config=None):
         print(error.path)
     except Exception as e:
         tf.logging.error(e)
-    print(get_chekpoint_config(config))
+    print(get_chekpoint_config('accurate'))
 
 
 def start(argv=None):
