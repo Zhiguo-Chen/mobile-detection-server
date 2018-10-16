@@ -44,4 +44,6 @@ def get_chekpoint_config(id_or_alias):
         raise ValueError('checkpoint not found')
     checkpoint_path = get_checkpoint_path(checkpoint['id'])
     config = get_config(os.path.join(checkpoint_path, 'config.yml'))
+    config.dataset.dir = checkpoint_path
+    config.train.job_dir = get_checkpoints_directory()
     return config

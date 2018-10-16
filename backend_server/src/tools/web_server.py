@@ -1,6 +1,7 @@
 import tensorflow as tf
 from flask import Flask, request, jsonify
 from threading import Thread
+from six.moves import _thread
 from src.utils.predicting import PredictorNetwork
 from src.tools.checkpoints import get_chekpoint_config
 
@@ -32,13 +33,14 @@ def start_network(config=None):
         print(error.path)
     except Exception as e:
         tf.logging.error(e)
-    print(get_chekpoint_config('accurate'))
+        _thread.interrupt_main()
 
 
 def start(argv=None):
 
     print('Hello World')
+    config = get_chekpoint_config('accurate')
     global NETWORK_START_THREAD
-    NETWORK_START_THREAD = Thread(target=start_network, args=())
+    NETWORK_START_THREAD = Thread(target=start_network, args=(config,))
     NETWORK_START_THREAD.start()
     app.run(host=HOST, port=PORT, debug=True)
