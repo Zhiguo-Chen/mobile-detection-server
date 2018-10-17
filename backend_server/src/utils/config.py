@@ -71,9 +71,8 @@ def should_replace(new_config, base_config, key):
 
 def get_base_config(model_class, base_config_filename='base_config.yml'):
     path = inspect.getfile(model_class)
+    print(path, ' >>>>')
     config_path = os.path.join(os.path.dirname(path), base_config_filename)
-    print('config path')
-    print(config_path)
     return load_config_file([config_path])
 
 

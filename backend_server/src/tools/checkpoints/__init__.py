@@ -19,8 +19,9 @@ def read_checkpoint_db():
     path = os.path.join(get_checkpoints_directory(), CHECKPOINTS_INDEX)
     if not os.path.exists(path):
         return {'checkpoints': {}}
-    with open(path) as f:
-        index = json.load(f)
+    # with open(path) as f:
+    #     index = json.load(f)
+    index = json.load(tf.gfile.GFile(path))
     return index
 
 
