@@ -1,1 +1,1 @@
-from .datasets import datasets
+from .datasets import get_dataset

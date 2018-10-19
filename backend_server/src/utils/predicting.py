@@ -1,6 +1,8 @@
 import tensorflow as tf
 import json
 import os
+from src.datasets import get_dataset
+from src.models import get_model
 
 
 class PredictorNetwork(object):
@@ -14,3 +16,7 @@ class PredictorNetwork(object):
             self.class_labels = None
 
         config.dataset.data_augmentation = None
+        dataset_class = get_dataset(config.dataset.type)
+        model_class = get_model(config.model.type)
+        dataset = dataset_class(config)
+        model = model_class(config)

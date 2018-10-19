@@ -21,8 +21,8 @@ SEQUENCE_FEATURES = {
 class ObjectDetectionDataset(BaseDataset):
     def __init__(self, config, name='object_detection_dataset', **kwargs):
         super(ObjectDetectionDataset, self).__init__(config, **kwargs)
-        self._image_min_size = config.datasets.image_preprocessing.get(
+        self._image_min_size = config.dataset.image_preprocessing.get(
             'min_size')
-        self._image_max_size = config.datasets.image_preprocessing.get(
+        self._image_max_size = config.dataset.image_preprocessing.get(
             'max_size')
         self._data_augmentation = config.dataset.data_augmentation or []

@@ -6,8 +6,8 @@ import sonnet as snt
 class BaseDataset(snt.AbstractModule):
     def __init__(self, config, **kwargs):
         super(BaseDataset, self).__init__(**kwargs)
-        self._dataset_dir = config.dataset._dataset_dir
-        self._num_epochs = config.train._num_epochs
+        self._dataset_dir = config.dataset.dir
+        self._num_epochs = config.train.num_epochs
         self._batch_size = config.train.batch_size
         self._split = config.dataset.split
         self._random_shuffle = config.train.random_shuffle
@@ -25,3 +25,6 @@ class BaseDataset(snt.AbstractModule):
             )
 
         self._total_queue_ops = 20
+
+    def _build(self):
+        pass
