@@ -2,6 +2,7 @@ import tensorflow as tf
 import sonnet as snt
 from src.utils.anchors import generate_anchors_reference
 import numpy as np
+from src.models.base import TruncatedBaseNetwork
 
 
 class FasterRCNN(snt.AbstractModule):
@@ -19,6 +20,18 @@ class FasterRCNN(snt.AbstractModule):
         self._anchor_reference = generate_anchors_reference(
             self._anchor_base_size, self._anchor_ratios, self._anchor_scales)
         print(self._anchor_reference)
+        self._num_anchors = self._anchor_reference[0]
+
+        self._rpn_cls_loss_weight = config.model.loss.rpn_cls_loss_weight
+        self._rpn_reg_loss_weight = config.model.loss.rpn_reg_loss_weights
+
+        self._rcnn_cls_loss_weight = config.model.loss.rcnn_cls_loss_weight
+        self._rcnn_reg_loss_weight = config.model.loss.rcnn_reg_loss_weights
+
+        self.losses_collection = ['fastercnn_losses']
+        self.base_network = TruncatedBaseNetwork(config.model.base_network)
 
     def _build(self, image, gt_box=None, is_training=False):
-        pass
+        image.set_shape((None, None, 3))
+        conv_feature_map = self.base_network(
+            tf.expand_dims(image, 0), is_training)
