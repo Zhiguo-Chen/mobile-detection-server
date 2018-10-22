@@ -1,6 +1,6 @@
 import tensorflow as tf
 import os
-from src.utils.home_dir import get_home_directory
+from src.utils import home_dir
 import json
 from src.utils.config import get_config
 
@@ -10,7 +10,7 @@ CHECKPOINTS_INDEX = 'checkpoints.json'
 
 
 def get_checkpoints_directory():
-    path = os.path.join(get_home_directory(),
+    path = os.path.join(home_dir.get_home_directory(),
                         CHECKPOINTS_DIRECTORY, CHECKPOINTS_PATH)
     return path
 
