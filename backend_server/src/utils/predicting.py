@@ -20,3 +20,12 @@ class PredictorNetwork(object):
         model_class = get_model(config.model.type)
         dataset = dataset_class(config)
         model = model_class(config)
+
+        gragh = tf.Graph()
+        self.sess = tf.Session(graph=gragh)
+        with gragh.as_default():
+            self.image_placeholder = tf.placeholder(
+                tf.float32, (None, None, 3))
+            print(self.image_placeholder)
+            image_tf, process_meta = dataset.preprocess(self.image_placeholder)
+            pred_dict = model(image_tf)
