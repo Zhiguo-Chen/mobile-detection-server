@@ -1,6 +1,7 @@
 import sonnet as snt
 import tensorflow as tf
 from src.utils.vars import get_initializer
+from sonnet.python.modules.conv import Conv2D
 
 
 class RPN(snt.AbstractModule):
@@ -24,4 +25,12 @@ class RPN(snt.AbstractModule):
         self._config = config
 
     def _build(self, conv_feature_map, im_shape, all_anchors, gt_boxes=None, is_training=False):
-        pass
+        self._instantiate_layers()
+
+    def _instantiate_layers(self):
+        self._rpn = Conv2D(output_channels=self._num_channels, kernel_shape=self._kernel_shape, initializers={
+                           'w': self._rpn_initializer}, regularizers={'w': self._regularizer}, name='conv')
+        self._rpn_cls = Conv2D(output_channels=self._num_anchors * 2, kernel_shape=[1, 1], initializers={
+                               'w': self._cls_initializer}, regularizers={'w': self._regularizer}, padding='VALID', name='cls_conv')
+        self._rpn_bbox = Conv2D(output_channels=self._num_anchors * 4, kernel_shape=[
+                                1, 1], initializers={'w': self._bbox_initializer}, regularizers={'w': self._regularizer}, padding='VALID', name='bbox_conv')
