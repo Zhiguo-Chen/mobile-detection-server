@@ -3,12 +3,14 @@ import sonnet as snt
 from src.utils.anchors import generate_anchors_reference
 import numpy as np
 from src.models.base import TruncatedBaseNetwork
+from src.models.fasterrcnn.rpn import RPN
+from src.utils.vars import variable_summaries
 
 
 class FasterRCNN(snt.AbstractModule):
     def __init__(self, config, name='fasterrcnn'):
         super(FasterRCNN, self).__init__(name=name)
-        self._congig = config
+        self._config = config
         self._num_classes = config.model.network.num_classes
         self._with_rcnn = config.model.network.with_rcnn
         self._debug = config.train.debug
@@ -35,3 +37,13 @@ class FasterRCNN(snt.AbstractModule):
         image.set_shape((None, None, 3))
         conv_feature_map = self.base_network(
             tf.expand_dims(image, 0), is_training)
+        self._rpn = RPN(self._num_anchors, self._config.model.rpn,
+                        debug=self._debug, seed=self._seed)
+        if self._with_rcnn:
+            self._rcnn = None
+        image_shape = tf.shape(image)[0:2]
+        variable_summaries(conv_feature_map, 'conv_feature_map', 'reduced')
+        all_anchors = self._generate_anchors(tf.shape(conv_feature_map))
+
+    def _generate_anchors(self, feature_map_shape):
+        return {}

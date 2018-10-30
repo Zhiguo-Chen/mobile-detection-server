@@ -1,5 +1,6 @@
 import sonnet as snt
 import tensorflow as tf
+from src.utils.bbox_transform_tf import decode
 
 
 class RPNProposal(snt.AbstractModule):
@@ -19,3 +20,4 @@ class RPNProposal(snt.AbstractModule):
     def _build(self, rpn_cls_prob, rpn_bbox_pred, all_anchors, im_shape):
         all_scores = rpn_cls_prob[:, 1]
         all_anchors = tf.reshape(all_scores, [-1])
+        all_proposals = decode(all_anchors, rpn_bbox_pred)
