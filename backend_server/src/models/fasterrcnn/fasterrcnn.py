@@ -46,4 +46,17 @@ class FasterRCNN(snt.AbstractModule):
         all_anchors = self._generate_anchors(tf.shape(conv_feature_map))
 
     def _generate_anchors(self, feature_map_shape):
-        return {}
+        with tf.variable_scope('generate_anchors'):
+            grid_width = feature_map_shape[2]
+            grid_height = feature_map_shape[1]
+            shift_x = tf.range(grid_width) * self._anchor_stride
+            shift_y = tf.range(grid_height) * self._anchor_stride
+            shift_x, shift_y = tf.meshgrid(shift_x, shift_y)
+            shift_x = tf.reshape(shift_x, [-1])
+            shift_y = tf.reshape(shift_y, [-1])
+            shifts = tf.stack([shift_x, shift_y, shift_x, shift_y], axis=0)
+            shifts = tf.transpose(shifts)
+            all_anchors = (np.expand_dims(self._anchor_reference,
+                                          axis=0) + tf.expand_dims(shifts, axis=1))
+            all_chors = tf.reshape(all_anchors, (-1, 4))
+            return all_chors
