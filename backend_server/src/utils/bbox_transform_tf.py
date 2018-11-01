@@ -29,3 +29,13 @@ def get_width_upright(bboxes):
         urx = x1 + .5 * width
         ury = y1 + .5 * height
         return width, height, urx, ury
+
+
+def change_order(bboxes):
+    with tf.name_scope('BoundingBoxTransform/change_order'):
+        first_min, second_min, first_max, second_max = tf.unstack(
+            bboxes, axis=1)
+        bboxes = tf.stack(
+            [second_min, first_min, second_max, first_max], axis=1
+        )
+        return bboxes
