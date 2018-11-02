@@ -52,3 +52,16 @@ class RPNProposal(snt.AbstractModule):
         if self._apply_nms:
             with tf.name_scope('nms'):
                 proposals_tf_order = change_order(sorted_top_proposals)
+                selected_indices = tf.image.non_max_suppression(proposals_tf_order, tf.reshape(
+                    sorted_top_scores, [-1]), self._post_nms_top_n, iou_threshold=self._nms_threshold)
+                nms_proposals_tf_order = tf.gather(
+                    proposals_tf_order, selected_indices, name='gather_nms_proposals')
+                proposals = change_order(nms_proposals_tf_order)
+                scores = tf.gather(
+                    sorted_top_proposals, selected_indices, name='gather_nms_proposals_scores')
+
+        pred = {
+            'proposals': proposals,
+            'scores': scores,
+        }
+        return pred
