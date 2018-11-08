@@ -1,6 +1,7 @@
 import sonnet as snt
 import tensorflow as tf
-from src.utils.vars import (get_initializer, get_activation_function)
+from src.utils.vars import (
+    get_initializer, get_activation_function, variable_summaries)
 from sonnet.python.modules.conv import Conv2D
 from .rpn_proposal import RPNProposal
 
@@ -45,6 +46,12 @@ class RPN(snt.AbstractModule):
         prediction_dict['rpn_bbox_pred'] = rpn_bbox_pred
         proposal_prediction = self._proposal(
             rpn_cls_prob, rpn_bbox_pred, all_anchors, im_shape)
+        prediction_dict['proposals'] = proposal_prediction['proposals']
+        prediction_dict['scores'] = proposal_prediction['scores']
+        variable_summaries(prediction_dict['scores'], 'rpn_scores', 'reduced')
+        variable_summaries(rpn_cls_prob, 'rpn_cls_prob', 'reduced')
+        variable_summaries(rpn_bbox_pred, 'rpn_bbox_pred', 'reduced')
+        return prediction_dict
 
     def _instantiate_layers(self):
         self._rpn = Conv2D(output_channels=self._num_channels, kernel_shape=self._kernel_shape, initializers={
