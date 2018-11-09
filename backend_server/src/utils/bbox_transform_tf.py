@@ -39,3 +39,18 @@ def change_order(bboxes):
             [second_min, first_min, second_max, first_max], axis=1
         )
         return bboxes
+
+
+def clip_boxes(bboxes, imshape):
+    with tf.name_scope('BoundingBoxTransform/clip_bboxes'):
+        bboxes = tf.cast(bboxes, dtype=tf.float32)
+        imshape = tf.cast(imshape, dtype=tf.float32)
+        x1, y1, x2, y2 = tf.split(bboxes, 4, axis=1)
+        width = imshape[1]
+        height = imshape[0]
+        x1 = tf.maximum(tf.minimum(x1, width - 1.0), 0.0)
+        x2 = tf.maximum(tf.minimum(x2, width - 1.0), 0.0)
+        y1 = tf.maximum(tf.minimum(y1, height - 1.0), 0.0)
+        y2 = tf.maximum(tf.minimum(y2, height - 1.0), 0.0)
+        bboxes = tf.concat([x1, y1, x2, y2], axis=1)
+        return bboxes
