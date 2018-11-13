@@ -34,7 +34,7 @@ class FasterRCNN(snt.AbstractModule):
         self.losses_collection = ['fastercnn_losses']
         self.base_network = TruncatedBaseNetwork(config.model.base_network)
 
-    def _build(self, image, gt_box=None, is_training=False):
+    def _build(self, image, gt_boxes=None, is_training=False):
         image.set_shape((None, None, 3))
         conv_feature_map = self.base_network(
             tf.expand_dims(image, 0), is_training)
@@ -47,8 +47,14 @@ class FasterRCNN(snt.AbstractModule):
         variable_summaries(conv_feature_map, 'conv_feature_map', 'reduced')
         all_anchors = self._generate_anchors(tf.shape(conv_feature_map))
         rpn_prediction = self._rpn(
-            conv_feature_map, image_shape, all_anchors, gt_box=gt_box, is_training=is_training)
+            conv_feature_map, image_shape, all_anchors, gt_box=gt_boxes, is_training=is_training)
         prediction_dict = {'rpn_prediction': rpn_prediction}
+        if self._with_rcnn:
+            proposals = tf.stop_gradient(rpn_prediction['proposals'])
+            classification_pred = self._rcnn(
+                conv_feature_map, proposals, image_shape, self.base_network, gt_boxes=gt_boxes, is_training=is_training)
+            prediction_dict['classification_prediction'] = classification_pred
+        return prediction_dict
 
     def _generate_anchors(self, feature_map_shape):
         with tf.variable_scope('generate_anchors'):
