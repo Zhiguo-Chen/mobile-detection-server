@@ -39,3 +39,45 @@ def variable_summaries(var, name, collection_key):
         tf.summary.scalar('min', tf.reduce_min(var), collections)
         tf.summary.histogram('histogram', var, collections)
         tf.summary.scalar('sparsity', tf.nn.zero_fraction(var), collections)
+
+
+def flip_image(image, bboxes=None, left_right=True, up_down=False):
+    image_shape = tf.shape(image)
+    height = image_shape[0]
+    width = image_shape[1]
+
+    if bboxes is not None:
+        # bboxes usually come from dataset as ints, but just in case we are
+        # using flip for preprocessing, where bboxes usually are represented as
+        # floats, we cast them.
+        bboxes = tf.to_int32(bboxes)
+
+    if left_right:
+        image = tf.image.flip_left_right(image)
+        if bboxes is not None:
+            x_min, y_min, x_max, y_max, label = tf.unstack(bboxes, axis=1)
+            new_x_min = width - x_max - 1
+            new_y_min = y_min
+            new_x_max = new_x_min + (x_max - x_min)
+            new_y_max = y_max
+            bboxes = tf.stack(
+                [new_x_min, new_y_min, new_x_max, new_y_max, label], axis=1
+            )
+
+    if up_down:
+        image = tf.image.flip_up_down(image)
+        if bboxes is not None:
+            x_min, y_min, x_max, y_max, label = tf.unstack(bboxes, axis=1)
+            new_x_min = x_min
+            new_y_min = height - y_max - 1
+            new_x_max = x_max
+            new_y_max = new_y_min + (y_max - y_min)
+            bboxes = tf.stack(
+                [new_x_min, new_y_min, new_x_max, new_y_max, label], axis=1
+            )
+
+    return_dict = {'image': image}
+    if bboxes is not None:
+        return_dict['bboxes'] = bboxes
+
+    return return_dict
