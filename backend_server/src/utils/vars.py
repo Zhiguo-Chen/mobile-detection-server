@@ -6,15 +6,43 @@ VAR_LOG_LEVELS = {
     'reduced': ['variable_summaries_reduced', 'variable_summaries_full']
 }
 
+VALID_INITIALIZERS = {
+    'truncated_normal_initializer': tf.truncated_normal_initializer,
+    'variance_scaling_initializer': (
+        tf.contrib.layers.variance_scaling_initializer
+    ),
+    'random_normal_initializer': tf.random_normal_initializer,
+    'xavier_initializer': tf.contrib.layers.xavier_initializer,
+}
+
 
 def get_initializer(initializer_config, seed=None):
+    """Get variable initializer.
+
+    Args:
+        - initializer_config: Configuration for initializer.
+
+    Returns:
+        initializer: Instantiated variable initializer.
+    """
+
+    if 'type' not in initializer_config:
+        raise ValueError('Initializer missing type.')
+
+    if initializer_config.type not in VALID_INITIALIZERS:
+        raise ValueError('Initializer "{}" is not valid.'.format(
+            initializer_config.type))
+
     config = initializer_config.copy()
+    initializer = VALID_INITIALIZERS[config.pop('type')]
     config['seed'] = seed
-    initializer = tf.random_normal_initializer(**config.pop('type'))
-    return initializer
+
+    return initializer(**config)
 
 
 def get_activation_function(activation_function):
+    if not activation_function:
+        return lambda a: a
     try:
         return getattr(tf.nn, activation_function)
     except AttributeError:

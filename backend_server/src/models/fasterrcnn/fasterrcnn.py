@@ -23,7 +23,7 @@ class FasterRCNN(snt.AbstractModule):
         self._anchor_reference = generate_anchors_reference(
             self._anchor_base_size, self._anchor_ratios, self._anchor_scales)
         print(self._anchor_reference)
-        self._num_anchors = self._anchor_reference[0]
+        self._num_anchors = self._anchor_reference.shape[0]
 
         self._rpn_cls_loss_weight = config.model.loss.rpn_cls_loss_weight
         self._rpn_reg_loss_weight = config.model.loss.rpn_reg_loss_weights
@@ -37,7 +37,7 @@ class FasterRCNN(snt.AbstractModule):
     def _build(self, image, gt_boxes=None, is_training=False):
         image.set_shape((None, None, 3))
         conv_feature_map = self.base_network(
-            tf.expand_dims(image, 0), is_training)
+            tf.expand_dims(image, 0), is_training=is_training)
         self._rpn = RPN(self._num_anchors, self._config.model.rpn,
                         debug=self._debug, seed=self._seed)
         if self._with_rcnn:
@@ -47,13 +47,13 @@ class FasterRCNN(snt.AbstractModule):
         variable_summaries(conv_feature_map, 'conv_feature_map', 'reduced')
         all_anchors = self._generate_anchors(tf.shape(conv_feature_map))
         rpn_prediction = self._rpn(
-            conv_feature_map, image_shape, all_anchors, gt_box=gt_boxes, is_training=is_training)
+            conv_feature_map, image_shape, all_anchors, gt_boxes=gt_boxes, is_training=is_training)
         prediction_dict = {'rpn_prediction': rpn_prediction}
-        if self._with_rcnn:
-            proposals = tf.stop_gradient(rpn_prediction['proposals'])
-            classification_pred = self._rcnn(
-                conv_feature_map, proposals, image_shape, self.base_network, gt_boxes=gt_boxes, is_training=is_training)
-            prediction_dict['classification_prediction'] = classification_pred
+        # if self._with_rcnn:
+        #     proposals = tf.stop_gradient(rpn_prediction['proposals'])
+        #     classification_pred = self._rcnn(
+        #         conv_feature_map, proposals, image_shape, self.base_network, gt_boxes=gt_boxes, is_training=is_training)
+        #     prediction_dict['classification_prediction'] = classification_pred
         return prediction_dict
 
     def _generate_anchors(self, feature_map_shape):

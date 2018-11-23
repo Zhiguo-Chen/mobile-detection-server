@@ -23,6 +23,8 @@ def decode(roi, deltas, variances=None):
 def get_width_upright(bboxes):
     with tf.name_scope('BoundingBoxTransform/get_width_upright'):
         bboxes = tf.cast(bboxes, tf.float32)
+        print('bboxes')
+        print(bboxes)
         x1, y1, x2, y2 = tf.split(bboxes, 4, axis=1)
         width = x2 - x1 + 1
         height = y2 - y1 + 1

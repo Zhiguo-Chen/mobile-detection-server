@@ -25,7 +25,9 @@ class PredictorNetwork(object):
         self.sess = tf.Session(graph=gragh)
         with gragh.as_default():
             self.image_placeholder = tf.placeholder(
-                tf.float32, (None, None, 3))
+                tf.float32, (None, None, 3)
+            )
             print(self.image_placeholder)
-            # image_tf, process_meta = dataset.preprocess(self.image_placeholder)
-            # pred_dict = model(image_tf)
+            image_tf, _, process_meta = dataset.preprocess(
+                self.image_placeholder)
+            pred_dict = model(image_tf)

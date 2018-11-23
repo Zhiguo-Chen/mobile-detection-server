@@ -19,7 +19,7 @@ class RPNProposal(snt.AbstractModule):
 
     def _build(self, rpn_cls_prob, rpn_bbox_pred, all_anchors, im_shape):
         all_scores = rpn_cls_prob[:, 1]
-        all_anchors = tf.reshape(all_scores, [-1])
+        all_scores = tf.reshape(all_scores, [-1])
         all_proposals = decode(all_anchors, rpn_bbox_pred)
         min_prob_filter = tf.greater_equal(
             all_scores, self._min_prob_threshold)
@@ -29,7 +29,7 @@ class RPNProposal(snt.AbstractModule):
         proposal_filter = tf.logical_and(zero_area_filter, min_prob_filter)
         all_proposals_total = tf.shape(all_scores)[0]
         unsorted_scores = tf.boolean_mask(
-            all_anchors, proposal_filter, name='filtered_scores')
+            all_scores, proposal_filter, name='filtered_scores')
         unsorted_proposals = tf.boolean_mask(
             all_proposals, proposal_filter, name='filtered_proposals')
         filtered_proposals_total = tf.shape(unsorted_scores)[0]
@@ -64,4 +64,5 @@ class RPNProposal(snt.AbstractModule):
             'proposals': proposals,
             'scores': scores,
         }
+
         return pred
