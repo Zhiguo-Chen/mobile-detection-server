@@ -17,7 +17,7 @@ class ROIPoolingLayer(snt.AbstractModule):
     def _roi_crop(self, roi_proposals, conv_feature_map, im_shape):
         bboxes = self._get_bboxes(roi_proposals, im_shape)
         bboxes_shape = tf.shape(bboxes)
-        batch_ids = tf.zeros((bboxes_shape[0], ), dtype=tf.float32)
+        batch_ids = tf.zeros((bboxes_shape[0], ), dtype=tf.int32)
         crops = tf.image.crop_and_resize(conv_feature_map, bboxes, batch_ids, [
                                          self._pooled_width * 2, self._pooled_height * 2], name='crops')
         prediction_dict = {'roi_pool': tf.nn.max_pool(

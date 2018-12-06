@@ -39,8 +39,6 @@ class RPN(snt.AbstractModule):
         )
 
         self._config = config
-        print('config')
-        print(config)
 
     def _build(self, conv_feature_map, im_shape, all_anchors, gt_boxes=None, is_training=False):
         self._instantiate_layers()
@@ -60,40 +58,17 @@ class RPN(snt.AbstractModule):
         prediction_dict['rpn_bbox_pred'] = rpn_bbox_pred
         proposal_prediction = self._proposal(
             rpn_cls_prob, rpn_bbox_pred, all_anchors, im_shape)
-        # prediction_dict['proposals'] = proposal_prediction['proposals']
-        # prediction_dict['scores'] = proposal_prediction['scores']
-        # variable_summaries(prediction_dict['scores'], 'rpn_scores', 'reduced')
-        # variable_summaries(rpn_cls_prob, 'rpn_cls_prob', 'reduced')
-        # variable_summaries(rpn_bbox_pred, 'rpn_bbox_pred', 'reduced')
+        prediction_dict['proposals'] = proposal_prediction['proposals']
+        prediction_dict['scores'] = proposal_prediction['scores']
+        variable_summaries(prediction_dict['scores'], 'rpn_scores', 'reduced')
+        variable_summaries(rpn_cls_prob, 'rpn_cls_prob', 'reduced')
+        variable_summaries(rpn_bbox_pred, 'rpn_bbox_pred', 'reduced')
         return prediction_dict
 
     def _instantiate_layers(self):
-        # self._rpn = Conv2D(output_channels=self._num_channels, kernel_shape=self._kernel_shape, initializers={
-        #                    'w': self._rpn_initializer}, regularizers={'w': self._regularizer}, name='conv')
-        # self._rpn_cls = Conv2D(output_channels=self._num_anchors * 2, kernel_shape=[1, 1], initializers={
-        #                        'w': self._cls_initializer}, regularizers={'w': self._regularizer}, padding='VALID', name='cls_conv')
-        # self._rpn_bbox = Conv2D(output_channels=self._num_anchors * 4, kernel_shape=[
-        #                         1, 1], initializers={'w': self._bbox_initializer}, regularizers={'w': self._regularizer}, padding='VALID', name='bbox_conv')
-
-        self._rpn = Conv2D(
-            output_channels=self._num_channels,
-            kernel_shape=self._kernel_shape,
-            initializers={'w': self._rpn_initializer},
-            regularizers={'w': self._regularizer},
-            name='conv'
-        )
-
-        self._rpn_cls = Conv2D(
-            output_channels=self._num_anchors * 2, kernel_shape=[1, 1],
-            initializers={'w': self._cls_initializer},
-            regularizers={'w': self._regularizer},
-            padding='VALID', name='cls_conv'
-        )
-
-        # BBox prediction is 4 values * number of anchors.
-        self._rpn_bbox = Conv2D(
-            output_channels=self._num_anchors * 4, kernel_shape=[1, 1],
-            initializers={'w': self._bbox_initializer},
-            regularizers={'w': self._regularizer},
-            padding='VALID', name='bbox_conv'
-        )
+        self._rpn = Conv2D(output_channels=self._num_channels, kernel_shape=self._kernel_shape, initializers={
+                           'w': self._rpn_initializer}, regularizers={'w': self._regularizer}, name='conv')
+        self._rpn_cls = Conv2D(output_channels=self._num_anchors * 2, kernel_shape=[1, 1], initializers={
+                               'w': self._cls_initializer}, regularizers={'w': self._regularizer}, padding='VALID', name='cls_conv')
+        self._rpn_bbox = Conv2D(output_channels=self._num_anchors * 4, kernel_shape=[
+                                1, 1], initializers={'w': self._bbox_initializer}, regularizers={'w': self._regularizer}, padding='VALID', name='bbox_conv')

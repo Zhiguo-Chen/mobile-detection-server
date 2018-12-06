@@ -49,11 +49,11 @@ class FasterRCNN(snt.AbstractModule):
         rpn_prediction = self._rpn(
             conv_feature_map, image_shape, all_anchors, gt_boxes=gt_boxes, is_training=is_training)
         prediction_dict = {'rpn_prediction': rpn_prediction}
-        # if self._with_rcnn:
-        #     proposals = tf.stop_gradient(rpn_prediction['proposals'])
-        #     classification_pred = self._rcnn(
-        #         conv_feature_map, proposals, image_shape, self.base_network, gt_boxes=gt_boxes, is_training=is_training)
-        #     prediction_dict['classification_prediction'] = classification_pred
+        if self._with_rcnn:
+            proposals = tf.stop_gradient(rpn_prediction['proposals'])
+            classification_pred = self._rcnn(
+                conv_feature_map, proposals, image_shape, self.base_network, gt_boxes=gt_boxes, is_training=is_training)
+            prediction_dict['classification_prediction'] = classification_pred
         return prediction_dict
 
     def _generate_anchors(self, feature_map_shape):

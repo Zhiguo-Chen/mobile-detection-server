@@ -47,7 +47,7 @@ class RCNN(snt.AbstractModule):
             net = self._activation(net)
             variable_summaries(
                 net, 'fc_{}_out'.format(i), 'reduced')
-        cls_score = self._clssifier_layer(net)
+        cls_score = self._classifier_layer(net)
         cls_prob = tf.nn.softmax(cls_score, axis=1)
         bbox_offsets = self._bbox_layer(net)
         prediction_dict['rcnn'] = {
@@ -68,8 +68,8 @@ class RCNN(snt.AbstractModule):
     def _instantiate_layers(self):
         self._layers = [snt.Linear(layer_size, name='fc{}'.format(i), initializers={'w': self._rcnn_initializer}, regularizers={
             'w': self.regularizer}) for i, layer_size in enumerate(self._layer_sizes)]
-        self._clssifier_layer = snt.Linear(self._num_classes + 1, name='fc_classifier', initializers={
-                                           'w': self._cls_initializer}, regularizers={'w': self.regularizer})
+        self._classifier_layer = snt.Linear(self._num_classes + 1, name='fc_classifier', initializers={
+            'w': self._cls_initializer}, regularizers={'w': self.regularizer})
         self._bbox_layer = snt.Linear(self._num_classes * 4, name='fc_bbox', initializers={
                                       'w': self._bbox_initializer}, regularizers={'w': self.regularizer})
         self._roi_pool = ROIPoolingLayer(self._config.roi, debug=self._debug)
