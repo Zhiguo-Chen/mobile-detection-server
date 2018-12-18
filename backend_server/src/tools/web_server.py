@@ -4,6 +4,7 @@ from threading import Thread
 from six.moves import _thread
 from src.utils.predicting import PredictorNetwork
 from src.tools.checkpoints import get_chekpoint_config
+from PIL import Image
 
 
 HOST = '127.0.0.1'
@@ -22,7 +23,22 @@ def predict():
 
     if request.method == 'POST':
         print('request coming POST')
-        return jsonify({'_key': '_value'})
+        try:
+            image_array = get_image()
+        except ValueError:
+            return jsonify(error='Missing image'), 400
+        except OSError:
+            return jsonify(error='Incompatitle file type'), 400
+        total_predictions = request.args.get('total')
+        if total_predictions is not None:
+            try:
+                total_predictions = int(total_predictions)
+            except ValueError:
+                total_predictions = None
+        NETWORK_START_THREAD.join()
+        objects = PREDICT_NETWORK.predict_image(image_array)
+        objects = objects[:total_predictions]
+        return jsonify({'objects': objects})
 
 
 def start_network(config=None):
@@ -44,3 +60,11 @@ def start(argv=None):
     NETWORK_START_THREAD = Thread(target=start_network, args=(config,))
     NETWORK_START_THREAD.start()
     app.run(host=HOST, port=PORT, debug=True)
+
+
+def get_image():
+    image = request.files.get('image')
+    if not image:
+        raise ValueError
+    image = Image.open(image.stream).convert('RGB')
+    return image
